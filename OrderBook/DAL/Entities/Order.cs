@@ -1,4 +1,4 @@
-﻿namespace OrderBook.DAL.Models
+﻿namespace OrderBook.DAL.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -8,8 +8,8 @@
         [Key]
         public Guid Id { get; set; }
 
-        //[Required]
-        //[StringLength(100)]
+        [Required]
+        //[StringLength(1000)]
         public String Details { get; set; }
 
         [Required]

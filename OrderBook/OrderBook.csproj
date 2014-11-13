@@ -61,6 +61,18 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.SqlServer.Compact.4.0.8854.1\lib\net40\System.Data.SqlServerCe.Entity.dll</HintPath>
     </Reference>
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\packages\Rx-Core.2.2.5\lib\net40\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\net40\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\packages\Rx-Linq.2.2.5\lib\net40\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices">
+      <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net40\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Caliburn.Micro.2.0.1\lib\net40\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -81,9 +93,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\ListItemBgColorConverter.cs" />
+    <Compile Include="DAL\BusinessModels\OrderBusinessModel.cs" />
     <Compile Include="DAL\Context\OrderContext.cs" />
-    <Compile Include="DAL\Models\Order.cs" />
-    <Compile Include="DAL\Models\Status.cs" />
+    <Compile Include="DAL\Entities\Order.cs" />
+    <Compile Include="DAL\Entities\Status.cs" />
+    <Compile Include="DAL\Mappers\IMapper.cs" />
+    <Compile Include="DAL\Mappers\OrderMapper.cs" />
     <Compile Include="ViewModels\AddChangeOrderViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\AddChangeOrderView.xaml.cs">

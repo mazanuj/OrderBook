@@ -2,7 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:cal="http://www.caliburnproject.org"
+        xmlns:converters="clr-namespace:OrderBook.Converters"
         Title="MainView" Height="300" Width="300">
+    <Window.Resources>
+        <converters:ListItemBgColorConverter x:Key="ListItemBgColorConverter" />
+    </Window.Resources>
+
     <Grid>
         <ListView x:Name="OrderCollection" SelectionMode="Single" Margin="0, 0, 5, 0">
             <ListView.ItemContainerStyle >
@@ -22,18 +27,21 @@
                                 <MenuItem Header="Remove" 
 									cal:Message.Attach="[Event Click] = [Action RemoveItem($dataContext)]"/>
 
+                                <MenuItem Header="Set to Completed" 
+									cal:Message.Attach="[Event Click] = [Action SetToCompleted($dataContext)]"/>
 
+                                <MenuItem Header="Set to Uncompleted" 
+									cal:Message.Attach="[Event Click] = [Action SetToUncompleted($dataContext)]"/>
                             </ContextMenu>
 
                         </Setter.Value>
                     </Setter>
-
+                    <Setter Property="Background" Value="{Binding Status, Converter={StaticResource ListItemBgColorConverter}}" />
                 </Style>
             </ListView.ItemContainerStyle>
 
             <ListView.View>
                 <GridView  >
-                    <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="50"/>
                     <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="70"/>
                     <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="70"/>
                     <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="70"/>
