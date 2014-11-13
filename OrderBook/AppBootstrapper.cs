@@ -1,7 +1,7 @@
 ﻿namespace OrderBook
 {
     using Caliburn.Micro;
-    using OrderBook.ViewModels;
+    using ViewModels;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;

@@ -1,15 +1,14 @@
 ﻿namespace OrderBook.ViewModels
 {
     using System;
-
     using Caliburn.Micro;
-    using OrderBook.DAL.Context;
-    using OrderBook.DAL.Models;
+    using DAL.Context;
+    using DAL.Models;
     using System.ComponentModel.Composition;
     using System.Linq;
     using System.Windows;
 
-    [Export(typeof(AddChangeOrderViewModel))]
+    [Export(typeof (AddChangeOrderViewModel))]
     public class AddChangeOrderViewModel : Screen
     {
         private readonly bool _isInEditMode;
@@ -54,20 +53,19 @@
                 {
                     db.Orders.Add(
                         new Order
-                            {
-                                Id = Guid.NewGuid(),
-                                Details = this.Details,
-                                Name = this.Name,
-                                Phone = this.Phone,
-                                Status = Status.Neutral
-                            });
+                        {
+                            Id = Guid.NewGuid(),
+                            Details = Details,
+                            Name = Name,
+                            Phone = Phone,
+                            Status = Status.Neutral
+                        });
                     db.SaveChanges();
                 }
             }
 
             IsOkay = true;
             TryClose();
-
         }
 
         public void Cancel()
@@ -85,7 +83,7 @@
         {
             using (var db = new OrderContext())
             {
-                var order = db.Orders.SingleOrDefault(x => x.Id == this._currentOrder.Id);
+                var order = db.Orders.SingleOrDefault(x => x.Id == _currentOrder.Id);
                 if (order != null)
                 {
                     order.Details = Details;

@@ -7,25 +7,54 @@
     using System.ComponentModel.Composition;
     using System.Linq;
 
-    [Export(typeof(MainViewModel))]
+    [Export(typeof (MainViewModel))]
     public class MainViewModel : PropertyChangedBase
     {
         private readonly IWindowManager _windowManager;
-
-        public ObservableCollection<Order> OrderCollection { get; set; }
-
+        private string textBoxSearch;
         private OrderContext db;
+        public ObservableCollection<Order> OrderCollection { get; set; }
 
         [ImportingConstructor]
         public MainViewModel(IWindowManager windowManager)
         {
             _windowManager = windowManager;
+            OrderCollection = new ObservableCollection<Order>();
+            AddItemsToCollection();
+        }
 
+        public string TextBoxSearch
+        {
+            get { return textBoxSearch; }
+            set
+            {
+                textBoxSearch = value;
+                Search(textBoxSearch);
+                NotifyOfPropertyChange(() => TextBoxSearch);
+            }
+        }
+
+        private void AddItemsToCollection()
+        {
+            OrderCollection.Clear();
             using (db = new OrderContext())
             {
-                OrderCollection = new ObservableCollection<Order>();
-
                 foreach (var order in db.Orders)
+                {
+                    OrderCollection.Add(order);
+                }
+            }
+        }
+
+        private void AddItemsToCollection(string query)
+        {
+            OrderCollection.Clear();
+            using (db = new OrderContext())
+            {
+                foreach (var order in db.Orders
+                    .Where(x => x.Details.Contains(query) ||
+                                x.Name.Contains(query) ||
+                                x.Phone.Contains(query)))
                 {
                     OrderCollection.Add(order);
                 }
@@ -49,7 +78,7 @@
                     db.SaveChanges();
                 }
             }
-            
+
             RefreshList();
         }
 
@@ -72,15 +101,19 @@
 
         private void RefreshList()
         {
-            OrderCollection.Clear();
+            AddItemsToCollection();
+        }
 
-            using (db = new OrderContext())
+        private void Search(string searchText)
+        {
+            if (string.IsNullOrEmpty(searchText) ||
+                string.IsNullOrWhiteSpace(searchText))
             {
-                foreach (var order in this.db.Orders)
-                {
-                    OrderCollection.Add(order);
-                }
+                AddItemsToCollection();
+                return;
             }
+
+            AddItemsToCollection(searchText);
         }
     }
 }
