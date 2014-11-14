@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:converters="clr-namespace:OrderBook.Converters"
-        Title="MainView" Height="300" Width="435">
+        Title="OrderBook" Height="300" Width="435">
 
     <Window.Resources>
         <converters:ListItemBgColorConverter x:Key="ListItemBgColorConverter" />
@@ -27,11 +27,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
-                <TextBlock Margin="5,2" Text="Write search text here..." Foreground="{StaticResource brushWatermarkForeground}"
+        <Grid Grid.Row="0" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
+            <TextBlock Margin="5,2" Text="Write search text here..." Foreground="{StaticResource brushWatermarkForeground}"
                        Visibility="{Binding ElementName=TextBoxSearch, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <TextBox Name="TextBoxSearch" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" />
-            </Grid>
+            <TextBox Name="TextBoxSearch" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" />
+        </Grid>
 
         <ListView Grid.Row="1" x:Name="OrderCollection" SelectionMode="Single" Margin="0, 0, 5, 0">
             <ListView.ItemContainerStyle >
@@ -64,9 +64,9 @@
 
             <ListView.View>
                 <GridView  >
-                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="70"/>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="70"/>
-                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="70"/>
+                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="200"/>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="100"/>
+                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="100"/>
                 </GridView>
             </ListView.View>
             <ListView.ContextMenu>
