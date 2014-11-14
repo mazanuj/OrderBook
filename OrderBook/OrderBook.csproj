@@ -82,9 +82,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\ConvertTextInputToVisibility.cs" />
+    <Compile Include="Converters\ListItemBgColorConverter.cs" />
+    <Compile Include="DAL\BusinessModels\OrderBusinessModel.cs" />
     <Compile Include="DAL\Context\OrderContext.cs" />
-    <Compile Include="DAL\Models\Order.cs" />
-    <Compile Include="DAL\Models\Status.cs" />
+    <Compile Include="DAL\Entities\Order.cs" />
+    <Compile Include="DAL\Entities\Status.cs" />
+    <Compile Include="DAL\Mappers\IMapper.cs" />
+    <Compile Include="DAL\Mappers\OrderMapper.cs" />
     <Compile Include="ViewModels\AddChangeOrderViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\AddChangeOrderView.xaml.cs">

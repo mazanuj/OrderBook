@@ -1,25 +1,30 @@
-﻿namespace OrderBook.ViewModels
+﻿using System.Collections.ObjectModel;
+using System.Data.Entity;
+using System.Linq;
+using OrderBook.DAL.BusinessModels;
+using OrderBook.DAL.Context;
+using OrderBook.DAL.Entities;
+using OrderBook.DAL.Mappers;
+
+namespace OrderBook.ViewModels
 {
     using Caliburn.Micro;
-    using OrderBook.DAL.Context;
-    using OrderBook.DAL.Models;
-    using System.Collections.ObjectModel;
     using System.ComponentModel.Composition;
-    using System.Linq;
 
     [Export(typeof (MainViewModel))]
     public class MainViewModel : PropertyChangedBase
     {
-        private readonly IWindowManager _windowManager;
+        private readonly OrderMapper mapper = new OrderMapper();
+        private readonly IWindowManager windowManager;
         private string textBoxSearch;
+        public ObservableCollection<OrderBusinessModel> OrderCollection { get; set; }
         private OrderContext db;
-        public ObservableCollection<Order> OrderCollection { get; set; }
 
         [ImportingConstructor]
         public MainViewModel(IWindowManager windowManager)
         {
-            _windowManager = windowManager;
-            OrderCollection = new ObservableCollection<Order>();
+            this.windowManager = windowManager;
+            OrderCollection = new ObservableCollection<OrderBusinessModel>();
             AddItemsToCollection();
         }
 
@@ -41,7 +46,7 @@
             {
                 foreach (var order in db.Orders)
                 {
-                    OrderCollection.Add(order);
+                    OrderCollection.Add(mapper.Map(order));
                 }
             }
         }
@@ -56,7 +61,7 @@
                                 x.Name.Contains(query) ||
                                 x.Phone.Contains(query)))
                 {
-                    OrderCollection.Add(order);
+                    OrderCollection.Add(mapper.Map(order));
                 }
             }
         }
@@ -66,32 +71,48 @@
             ShowConfirmationItemDialog(null);
         }
 
-        public void RemoveItem(Order order)
+        public void RemoveItem(OrderBusinessModel orderBusModel)
         {
             using (db = new OrderContext())
             {
-                var ord = db.Orders.SingleOrDefault(x => x.Id == order.Id);
-
-                if (ord != null)
-                {
-                    db.Orders.Remove(ord);
-                    db.SaveChanges();
-                }
+                var order = mapper.Map(orderBusModel);
+                db.Entry(order).State = EntityState.Deleted;
+                db.SaveChanges();
             }
 
             RefreshList();
         }
 
-        public void ChangeItem(Order order)
+        public void ChangeItem(OrderBusinessModel orderBusModel)
         {
-            ShowConfirmationItemDialog(order);
+            ShowConfirmationItemDialog(orderBusModel);
         }
 
-        private void ShowConfirmationItemDialog(Order currentOrder)
+        public void SetToCompleted(OrderBusinessModel orderBusModel)
         {
-            var confirmationViewModel = new AddChangeOrderViewModel(currentOrder);
+            ChangeOrderStatus(orderBusModel, Status.Completed);
+        }
 
-            _windowManager.ShowDialog(confirmationViewModel);
+        public void SetToUncompleted(OrderBusinessModel orderBusModel)
+        {
+            ChangeOrderStatus(orderBusModel, Status.Uncompleted);
+        }
+
+        private void ChangeOrderStatus(OrderBusinessModel orderBusModel, Status status)
+        {
+            using (db = new OrderContext())
+            {
+                orderBusModel.Status = status;
+                var order = mapper.Map(orderBusModel);
+                db.Entry(order).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+        }
+
+        private void ShowConfirmationItemDialog(OrderBusinessModel currentOrderBusModel)
+        {
+            var confirmationViewModel = new AddChangeOrderViewModel(currentOrderBusModel);
+            windowManager.ShowDialog(confirmationViewModel);
 
             if (confirmationViewModel.IsOkay)
             {

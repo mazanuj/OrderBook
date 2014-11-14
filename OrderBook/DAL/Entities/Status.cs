@@ -1,4 +1,4 @@
-﻿namespace OrderBook.DAL.Models
+﻿namespace OrderBook.DAL.Entities
 {
     public enum Status
     {

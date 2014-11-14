@@ -1,7 +1,7 @@
 ﻿namespace OrderBook.DAL.Context
 {
-    using Models;
     using System.Data.Entity;
+    using Entities;
 
     public class OrderContext : DbContext
     {

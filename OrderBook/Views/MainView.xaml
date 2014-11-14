@@ -6,6 +6,7 @@
         Title="MainView" Height="300" Width="435">
 
     <Window.Resources>
+        <converters:ListItemBgColorConverter x:Key="ListItemBgColorConverter" />
         <SolidColorBrush x:Key="brushWatermarkBackground" Color="White" />
         <SolidColorBrush x:Key="brushWatermarkForeground" Color="LightSteelBlue" />
         <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />
@@ -48,21 +49,26 @@
 
                                 <MenuItem Header="Remove" 
 									cal:Message.Attach="[Event Click] = [Action RemoveItem($dataContext)]"/>
+
+                                <MenuItem Header="Set to Completed" 
+									cal:Message.Attach="[Event Click] = [Action SetToCompleted($dataContext)]"/>
+
+                                <MenuItem Header="Set to Uncompleted" 
+									cal:Message.Attach="[Event Click] = [Action SetToUncompleted($dataContext)]"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
+                    <Setter Property="Background" Value="{Binding Status, Converter={StaticResource ListItemBgColorConverter}}" />
                 </Style>
             </ListView.ItemContainerStyle>
 
             <ListView.View>
-                <GridView>
-                    <!--<GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="50"/>-->
-                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="200"/>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="100"/>
-                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="100"/>
+                <GridView  >
+                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="70"/>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="70"/>
+                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="70"/>
                 </GridView>
             </ListView.View>
-
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Add new item" 
