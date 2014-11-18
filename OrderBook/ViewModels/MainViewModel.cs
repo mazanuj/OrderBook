@@ -1,6 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Linq;
+using System.Windows.Documents;
 using OrderBook.DAL.BusinessModels;
 using OrderBook.DAL.Context;
 using OrderBook.DAL.Entities;
@@ -44,10 +47,32 @@ namespace OrderBook.ViewModels
             OrderCollection.Clear();
             using (db = new OrderContext())
             {
+                var completed = new List<Order>();
+                var neutral = new List<Order>();
+                var uncompleted = new List<Order>();
+
                 foreach (var order in db.Orders)
                 {
-                    OrderCollection.Add(mapper.Map(order));
+                    switch (order.Status)
+                    {
+                        case Status.Neutral:
+                            neutral.Add(order);
+                            break;
+                        case Status.Completed:
+                            completed.Add(order);
+                            break;
+                        case Status.Uncompleted:
+                            uncompleted.Add(order);
+                            break;
+                    }
                 }
+
+                foreach (var order in uncompleted)
+                    OrderCollection.Add(mapper.Map(order));
+                foreach (var order in neutral)
+                    OrderCollection.Add(mapper.Map(order));
+                foreach (var order in completed)
+                    OrderCollection.Add(mapper.Map(order));
             }
         }
 
@@ -56,13 +81,35 @@ namespace OrderBook.ViewModels
             OrderCollection.Clear();
             using (db = new OrderContext())
             {
+                var completed = new List<Order>();
+                var neutral = new List<Order>();
+                var uncompleted = new List<Order>();
+
                 foreach (var order in db.Orders
                     .Where(x => x.Details.Contains(query) ||
                                 x.Name.Contains(query) ||
                                 x.Phone.Contains(query)))
                 {
-                    OrderCollection.Add(mapper.Map(order));
+                    switch (order.Status)
+                    {
+                        case Status.Neutral:
+                            neutral.Add(order);
+                            break;
+                        case Status.Completed:
+                            completed.Add(order);
+                            break;
+                        case Status.Uncompleted:
+                            uncompleted.Add(order);
+                            break;
+                    }
                 }
+
+                foreach (var order in uncompleted)
+                    OrderCollection.Add(mapper.Map(order));
+                foreach (var order in neutral)
+                    OrderCollection.Add(mapper.Map(order));
+                foreach (var order in completed)
+                    OrderCollection.Add(mapper.Map(order));
             }
         }
 
