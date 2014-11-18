@@ -26,7 +26,14 @@
         [ImportingConstructor]
         public AddChangeOrderViewModel(OrderBusinessModel currentOrderBusModel)
         {
-            if (currentOrderBusModel == null) return;
+            base.DisplayName = "Add/change order";
+
+            if (currentOrderBusModel == null)
+            {
+                base.DisplayName = "Add new order";
+                return;
+            }
+            base.DisplayName = "Change order";
             isInEditMode = true;
 
             this.currentOrderBusModel = currentOrderBusModel;
