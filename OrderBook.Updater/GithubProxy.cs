@@ -11,7 +11,7 @@
         {
             using (var client = new WebClient())
             {
-                return client.DownloadString("https://github.com/mazanuj/RealEstate/tree/mazanuj/install/status.xml");
+                return client.DownloadString("https://github.com/mazanuj/OrderBook/tree/pele/install/status.xml");
             }
         }
 
@@ -19,7 +19,7 @@
         {
             using (var client = new WebClient())
             {
-                return client.DownloadString("https://github.com/mazanuj/RealEstate/tree/mazanuj/install/files/version").Trim();
+                return client.DownloadString("https://github.com/mazanuj/OrderBook/tree/pele/install/files/version").Trim();
             }
         }
 
@@ -33,7 +33,7 @@
 
             using (var client = new WebClient())
             {
-                client.DownloadFile("https://github.com/mazanuj/RealEstate/tree/mazanuj/install/files/" + filename, filename);
+                client.DownloadFile("https://github.com/mazanuj/OrderBook/tree/pele/install/files" + filename, filename);
             }
             RepairLineEnding(filename);
         }
