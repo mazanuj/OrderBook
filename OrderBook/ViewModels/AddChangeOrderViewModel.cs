@@ -1,4 +1,6 @@
-﻿namespace OrderBook.ViewModels
+﻿using System.Text.RegularExpressions;
+
+namespace OrderBook.ViewModels
 {
     using Caliburn.Micro;
     using DAL.BusinessModels;
@@ -19,6 +21,7 @@
 
         public string Details { get; set; }
         public string Name { get; set; }
+
         public string Phone { get; set; }
 
         public bool IsOkay { get; set; }
@@ -64,7 +67,7 @@
                         Id = Guid.NewGuid(),
                         Details = Details,
                         Name = Name,
-                        Phone = Phone,
+                        Phone = "38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
                         Status = Status.Neutral
                     };
 
@@ -94,9 +97,9 @@
                 var orderBusModel = new OrderBusinessModel
                 {
                     Id = currentOrderBusModel.Id,
-                    Details = this.Details,
-                    Name = this.Name,
-                    Phone = this.Phone,
+                    Details = Details,
+                    Name = Name,
+                    Phone = "38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
                     Status = currentOrderBusModel.Status
                 };
 

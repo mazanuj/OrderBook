@@ -2,8 +2,7 @@
 {
     using System;
     using System.ComponentModel;
-
-    using OrderBook.DAL.Entities;
+    using Entities;
 
     public class OrderBusinessModel : INotifyPropertyChanged
     {
@@ -19,10 +18,7 @@
 
         public Status Status
         {
-            get
-            {
-                return status;
-            }
+            get { return status; }
             set
             {
                 if (status == value)
@@ -36,11 +32,9 @@
         private void SendPropertyChanged(string propertyName)
         {
             var handler = PropertyChanged;
-            if (handler != null)
-            {
-                var e = new PropertyChangedEventArgs(propertyName);
-                PropertyChanged(this, e);
-            }
+            if (handler == null) return;
+            var e = new PropertyChangedEventArgs(propertyName);
+            PropertyChanged(this, e);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

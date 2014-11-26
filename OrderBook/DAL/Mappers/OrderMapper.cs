@@ -1,7 +1,7 @@
 ﻿namespace OrderBook.DAL.Mappers
 {
-    using OrderBook.DAL.BusinessModels;
-    using OrderBook.DAL.Entities;
+    using BusinessModels;
+    using Entities;
 
     public class OrderMapper : IMapper<Order, OrderBusinessModel>
     {
@@ -12,8 +12,8 @@
                 return null;
             }
 
-            var destination = new Order 
-            { 
+            var destination = new Order
+            {
                 Id = source.Id,
                 Details = source.Details,
                 Name = source.Name,
@@ -30,7 +30,7 @@
             {
                 return null;
             }
-            
+
             var destination = new OrderBusinessModel
             {
                 Id = source.Id,
@@ -39,7 +39,7 @@
                 Phone = source.Phone,
                 Status = source.Status
             };
-            
+
             return destination;
         }
     }

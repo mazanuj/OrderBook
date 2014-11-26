@@ -15,7 +15,7 @@
             switch (status)
             {
                 case Status.Neutral:
-                    return Brushes.White;
+                    return Brushes.Gainsboro;
                 case Status.Completed:
                     return Brushes.GreenYellow;
                 case Status.Uncompleted:

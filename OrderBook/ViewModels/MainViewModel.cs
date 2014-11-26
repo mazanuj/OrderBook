@@ -1,9 +1,8 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Linq;
-using System.Windows.Documents;
 using OrderBook.DAL.BusinessModels;
 using OrderBook.DAL.Context;
 using OrderBook.DAL.Entities;
@@ -17,11 +16,90 @@ namespace OrderBook.ViewModels
     [Export(typeof (MainViewModel))]
     public class MainViewModel : PropertyChangedBase
     {
-        private readonly OrderMapper mapper = new OrderMapper();
         private readonly IWindowManager windowManager;
         private string textBoxSearch;
+        private double width = 800.0;
+        private double height = 600.0;
+        private double left, top;
+        private int detailsWidth = 400;
+        private int nameWidth = 100;
+        private int phoneWidth = 100;
+        private readonly OrderMapper orderMapper = new OrderMapper();
+        private readonly SettingsMapper settingsMapper = new SettingsMapper();
         public ObservableCollection<OrderBusinessModel> OrderCollection { get; set; }
-        private OrderContext db;
+
+        public int PhoneWidth
+        {
+            get { return phoneWidth; }
+            set
+            {
+                phoneWidth = value;
+                NotifyOfPropertyChange(() => PhoneWidth);
+            }
+        }
+
+        public int NameWidth
+        {
+            get { return nameWidth; }
+            set
+            {
+                nameWidth = value;
+                NotifyOfPropertyChange(() => NameWidth);
+            }
+        }
+
+        public int DetailsWidth
+        {
+            get { return detailsWidth; }
+            set
+            {
+                detailsWidth = value;
+                NotifyOfPropertyChange(() => DetailsWidth);
+            }
+        }
+
+        public double Width
+        {
+            get { return width; }
+            set
+            {
+                width = value;
+                NotifyOfPropertyChange(() => Width);
+            }
+        }
+
+        public double Height
+        {
+            get { return height; }
+            set
+            {
+                height = value;
+                NotifyOfPropertyChange(() => Height);
+            }
+        }
+
+        public double Left
+        {
+            get { return left; }
+            set
+            {
+                left = value;
+                NotifyOfPropertyChange(() => Left);
+            }
+        }
+
+        public double Top
+        {
+            get { return top; }
+            set
+            {
+                top = value;
+                NotifyOfPropertyChange(() => Top);
+            }
+        }
+
+        private OrderContext orderDb;
+        private SettingsContext settingsDb;
 
         [ImportingConstructor]
         public MainViewModel(IWindowManager windowManager)
@@ -29,6 +107,24 @@ namespace OrderBook.ViewModels
             this.windowManager = windowManager;
             OrderCollection = new ObservableCollection<OrderBusinessModel>();
             AddItemsToCollection();
+            LoadSavedSetings();
+        }
+
+        private void LoadSavedSetings()
+        {
+            using (settingsDb = new SettingsContext())
+            {
+                foreach (var setting in settingsDb.Settings)
+                {
+                    Width = setting.Width;
+                    Height = setting.Height;
+                    Top = setting.Top;
+                    Left = setting.Left;
+                    DetailsWidth = setting.DetailsWidth;
+                    PhoneWidth = setting.PhoneWidth;
+                    NameWidth = setting.NameWidth;
+                }
+            }
         }
 
         public string TextBoxSearch
@@ -45,13 +141,13 @@ namespace OrderBook.ViewModels
         private void AddItemsToCollection()
         {
             OrderCollection.Clear();
-            using (db = new OrderContext())
+            using (orderDb = new OrderContext())
             {
                 var completed = new List<Order>();
                 var neutral = new List<Order>();
                 var uncompleted = new List<Order>();
 
-                foreach (var order in db.Orders)
+                foreach (var order in orderDb.Orders)
                 {
                     switch (order.Status)
                     {
@@ -68,24 +164,24 @@ namespace OrderBook.ViewModels
                 }
 
                 foreach (var order in uncompleted)
-                    OrderCollection.Add(mapper.Map(order));
+                    OrderCollection.Add(orderMapper.Map(order));
                 foreach (var order in neutral)
-                    OrderCollection.Add(mapper.Map(order));
+                    OrderCollection.Add(orderMapper.Map(order));
                 foreach (var order in completed)
-                    OrderCollection.Add(mapper.Map(order));
+                    OrderCollection.Add(orderMapper.Map(order));
             }
         }
 
         private void AddItemsToCollection(string query)
         {
             OrderCollection.Clear();
-            using (db = new OrderContext())
+            using (orderDb = new OrderContext())
             {
                 var completed = new List<Order>();
                 var neutral = new List<Order>();
                 var uncompleted = new List<Order>();
 
-                foreach (var order in db.Orders
+                foreach (var order in orderDb.Orders
                     .Where(x => x.Details.Contains(query) ||
                                 x.Name.Contains(query) ||
                                 x.Phone.Contains(query)))
@@ -105,11 +201,11 @@ namespace OrderBook.ViewModels
                 }
 
                 foreach (var order in uncompleted)
-                    OrderCollection.Add(mapper.Map(order));
+                    OrderCollection.Add(orderMapper.Map(order));
                 foreach (var order in neutral)
-                    OrderCollection.Add(mapper.Map(order));
+                    OrderCollection.Add(orderMapper.Map(order));
                 foreach (var order in completed)
-                    OrderCollection.Add(mapper.Map(order));
+                    OrderCollection.Add(orderMapper.Map(order));
             }
         }
 
@@ -120,14 +216,13 @@ namespace OrderBook.ViewModels
 
         public void RemoveItem(OrderBusinessModel orderBusModel)
         {
-            using (db = new OrderContext())
+            using (orderDb = new OrderContext())
             {
-                var order = mapper.Map(orderBusModel);
-                db.Entry(order).State = EntityState.Deleted;
-                db.SaveChanges();
+                orderDb.Entry(orderMapper.Map(orderBusModel)).State = EntityState.Deleted;
+                orderDb.SaveChanges();
             }
 
-            RefreshList();
+            AddItemsToCollection();
         }
 
         public void ChangeItem(OrderBusinessModel orderBusModel)
@@ -147,13 +242,14 @@ namespace OrderBook.ViewModels
 
         private void ChangeOrderStatus(OrderBusinessModel orderBusModel, Status status)
         {
-            using (db = new OrderContext())
+            using (orderDb = new OrderContext())
             {
                 orderBusModel.Status = status;
-                var order = mapper.Map(orderBusModel);
-                db.Entry(order).State = EntityState.Modified;
-                db.SaveChanges();
+                var order = orderMapper.Map(orderBusModel);
+                orderDb.Entry(order).State = EntityState.Modified;
+                orderDb.SaveChanges();
             }
+            AddItemsToCollection();
         }
 
         private void ShowConfirmationItemDialog(OrderBusinessModel currentOrderBusModel)
@@ -162,14 +258,7 @@ namespace OrderBook.ViewModels
             windowManager.ShowDialog(confirmationViewModel);
 
             if (confirmationViewModel.IsOkay)
-            {
-                RefreshList();
-            }
-        }
-
-        private void RefreshList()
-        {
-            AddItemsToCollection();
+                AddItemsToCollection();
         }
 
         private void Search(string searchText)
@@ -182,6 +271,33 @@ namespace OrderBook.ViewModels
             }
 
             AddItemsToCollection(searchText);
+        }
+
+        public void OnClose()
+        {
+            using (settingsDb = new SettingsContext())
+            {
+                if (settingsDb.Settings.Count() != 0)
+                    foreach (var setting in settingsDb.Settings)
+                        settingsDb.Settings.Remove(setting);
+
+                var settingsBusModel = new SettingsBusinessModel
+                {
+                    DetailsWidth = DetailsWidth,
+                    PhoneWidth = PhoneWidth,
+                    NameWidth = NameWidth,
+                    /* = */
+                    /* = */
+                    Height = Height,
+                    Width = Width,
+                    Left = Left,
+                    Top = Top,
+                    Id = Guid.NewGuid()
+                };
+
+                settingsDb.Settings.Add(settingsMapper.Map(settingsBusModel));
+                settingsDb.SaveChanges();
+            }
         }
     }
 }

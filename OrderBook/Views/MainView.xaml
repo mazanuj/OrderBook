@@ -1,16 +1,28 @@
-﻿<Window x:Class="OrderBook.Views.MainView"
+﻿<controls:MetroWindow x:Class="OrderBook.Views.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:converters="clr-namespace:OrderBook.Converters"
-        Title="OrderBook" Height="300" Width="435">
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:businessModels="clr-namespace:OrderBook.DAL.BusinessModels"
+        xmlns:viewModels="clr-namespace:OrderBook.ViewModels"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        mc:Ignorable="d"
+        Title="OrderBook" 
+        Height="{Binding Height, Mode=TwoWay}"
+        Width="{Binding Width, Mode=TwoWay}" 
+        Left="{Binding Left, Mode=TwoWay}"
+        Top="{Binding Top, Mode=TwoWay}"
+        cal:Message.Attach="[Event Closing] = [Action OnClose()]"
+        d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
 
     <Window.Resources>
         <converters:ListItemBgColorConverter x:Key="ListItemBgColorConverter" />
         <SolidColorBrush x:Key="brushWatermarkBackground" Color="White" />
         <SolidColorBrush x:Key="brushWatermarkForeground" Color="LightSteelBlue" />
-        <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />
-
+        <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />        
+        
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:TextInputToVisibilityConverter x:Key="TextInputToVisibilityConverter" />
 
@@ -33,9 +45,10 @@
             <TextBox Name="TextBoxSearch" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" />
         </Grid>
 
-        <ListView Grid.Row="1" x:Name="OrderCollection" SelectionMode="Single" Margin="0, 0, 5, 0">
+        <ListView Grid.Row="1" x:Name="OrderCollection" SelectionMode="Single" Margin="0, 0, 5, 0"
+                  d:DataContext="{d:DesignInstance businessModels:OrderBusinessModel}" Background="CornflowerBlue">
             <ListView.ItemContainerStyle >
-                <Style TargetType="{x:Type ListBoxItem}" >
+                <Style TargetType="{x:Type ListBoxItem}">
                     <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
@@ -59,14 +72,16 @@
                         </Setter.Value>
                     </Setter>
                     <Setter Property="Background" Value="{Binding Status, Converter={StaticResource ListItemBgColorConverter}}" />
+                    <Setter Property="MinHeight" Value="30"/>
+                    <Setter Property="MaxHeight" Value="300"/>
                 </Style>
             </ListView.ItemContainerStyle>
 
             <ListView.View>
                 <GridView  >
-                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="200"/>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="100"/>
-                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="100"/>
+                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="{Binding DetailsWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="{Binding NameWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="{Binding PhoneWidth, Mode=TwoWay}"/>
                 </GridView>
             </ListView.View>
             <ListView.ContextMenu>
@@ -77,4 +92,4 @@
             </ListView.ContextMenu>
         </ListView>
     </Grid>
-</Window>
+</controls:MetroWindow>
