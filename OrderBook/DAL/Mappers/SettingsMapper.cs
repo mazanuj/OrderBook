@@ -3,16 +3,16 @@ using OrderBook.DAL.Entities;
 
 namespace OrderBook.DAL.Mappers
 {
-    internal class SettingsMapper : IMapper<Settings, SettingsBusinessModel>
+    internal class SettingsMapper : IMapper<Setting, SettingsBusinessModel>
     {
-        public Settings Map(SettingsBusinessModel source)
+        public Setting Map(SettingsBusinessModel source)
         {
             if (source == null)
             {
                 return null;
             }
 
-            var destination = new Settings
+            var destination = new Setting
             {
                 Id = source.Id,
                 Height = source.Height,
@@ -21,13 +21,14 @@ namespace OrderBook.DAL.Mappers
                 Width = source.Width,
                 DetailsWidth = source.DetailsWidth,
                 NameWidth = source.NameWidth,
-                PhoneWidth = source.PhoneWidth
+                PhoneWidth = source.PhoneWidth,
+                DateWidth = source.DateWidth
             };
 
             return destination;
         }
 
-        public SettingsBusinessModel Map(Settings source)
+        public SettingsBusinessModel Map(Setting source)
         {
             if (source == null)
             {
@@ -43,7 +44,8 @@ namespace OrderBook.DAL.Mappers
                 Width = source.Width,
                 PhoneWidth = source.PhoneWidth,
                 DetailsWidth = source.DetailsWidth,
-                NameWidth = source.NameWidth
+                NameWidth = source.NameWidth,
+                DateWidth = source.DateWidth
             };
 
             return destination;

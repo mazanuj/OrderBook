@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace OrderBook.ViewModels
 {
@@ -15,9 +16,14 @@ namespace OrderBook.ViewModels
     [Export(typeof (AddChangeOrderViewModel))]
     public class AddChangeOrderViewModel : Screen
     {
-        private readonly OrderMapper mapper = new OrderMapper();
         private readonly bool isInEditMode;
+        private string details;
+        private string name;
+        private string phone;
+        private readonly OrderMapper mapper = new OrderMapper();
         private readonly OrderBusinessModel currentOrderBusModel;
+        private ObservableCollection<OrderBusinessModel> businessModels = new ObservableCollection<OrderBusinessModel>();
+        private ObservableCollection<OrderBusinessModel> originModels = new ObservableCollection<OrderBusinessModel>();
 
         public string Details { get; set; }
         public string Name { get; set; }
@@ -27,16 +33,20 @@ namespace OrderBook.ViewModels
         public bool IsOkay { get; set; }
 
         [ImportingConstructor]
-        public AddChangeOrderViewModel(OrderBusinessModel currentOrderBusModel)
+        public AddChangeOrderViewModel(OrderBusinessModel currentOrderBusModel,
+            ObservableCollection<OrderBusinessModel> busModel,ObservableCollection<OrderBusinessModel> origin)
         {
-            base.DisplayName = "Add/change order";
+            businessModels = busModel;
+            originModels = origin;
+            base.DisplayName = "Добавление (Редактирование) записи";
 
             if (currentOrderBusModel == null)
             {
-                base.DisplayName = "Add new order";
+                base.DisplayName = "Добавление записи";
                 return;
             }
-            base.DisplayName = "Change order";
+
+            base.DisplayName = "Редактирование записи";
             isInEditMode = true;
 
             this.currentOrderBusModel = currentOrderBusModel;
@@ -60,20 +70,41 @@ namespace OrderBook.ViewModels
             }
             else
             {
-                using (var db = new OrderContext())
+                businessModels.Insert(0, new OrderBusinessModel
                 {
-                    var orderBusModel = new OrderBusinessModel
-                    {
-                        Id = Guid.NewGuid(),
-                        Details = Details,
-                        Name = Name,
-                        Phone = "38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
-                        Status = Status.Neutral
-                    };
+                    Id = Guid.NewGuid(),
+                    Details = Details,
+                    Name = Name,
+                    Phone = Phone, //"38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
+                    Status = Status.Neutral,
+                    Date = DateTime.Now
+                });
 
-                    db.Orders.Add(mapper.Map(orderBusModel));
-                    db.SaveChanges();
-                }
+                originModels.Insert(0, new OrderBusinessModel
+                {
+                    Id = Guid.NewGuid(),
+                    Details = Details,
+                    Name = Name,
+                    Phone = Phone, //"38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
+                    Status = Status.Neutral,
+                    Date = DateTime.Now
+                });
+
+                //using (var db = new OrderContext())
+                //{
+                //    var orderBusModel = new OrderBusinessModel
+                //    {
+                //        Id = Guid.NewGuid(),
+                //        Date = DateTime.Now,
+                //        Details = Details,
+                //        Name = Name,
+                //        Phone = Phone, //"38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
+                //        Status = Status.Neutral
+                //    };
+
+                //    db.Orders.Add(mapper.Map(orderBusModel));
+                //    db.SaveChanges();
+                //}
             }
 
             IsOkay = true;
@@ -87,25 +118,47 @@ namespace OrderBook.ViewModels
 
         private bool CheckIfFieldsAreFilled()
         {
-            return !string.IsNullOrEmpty(Details) && !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Phone);
+            return true;
+            //return !string.IsNullOrEmpty(Details) && !string.IsNullOrEmpty(Name) &&
+            //       !string.IsNullOrEmpty(Phone) && Regex.IsMatch(Phone, @"^(\d|\-|\(|\)|\+|\s)*$");
         }
 
         private void ChangeCurrentOrder()
         {
-            using (var db = new OrderContext())
+            businessModels[businessModels.IndexOf(currentOrderBusModel)] = new OrderBusinessModel
             {
-                var orderBusModel = new OrderBusinessModel
-                {
-                    Id = currentOrderBusModel.Id,
-                    Details = Details,
-                    Name = Name,
-                    Phone = "38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
-                    Status = currentOrderBusModel.Status
-                };
+                Id = currentOrderBusModel.Id,
+                Details = Details,
+                Name = Name,
+                Phone = Phone, //"38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
+                Status = currentOrderBusModel.Status,
+                Date = currentOrderBusModel.Date
+            };
 
-                db.Entry(mapper.Map(orderBusModel)).State = EntityState.Modified;
-                db.SaveChanges();
-            }
+            originModels[originModels.IndexOf(currentOrderBusModel)] = new OrderBusinessModel
+            {
+                Id = currentOrderBusModel.Id,
+                Details = Details,
+                Name = Name,
+                Phone = Phone, //"38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
+                Status = currentOrderBusModel.Status,
+                Date = currentOrderBusModel.Date
+            };
+            //using (var db = new OrderContext())
+            //{
+            //    var orderBusModel = new OrderBusinessModel
+            //    {
+            //        Id = currentOrderBusModel.Id,
+            //        Details = Details,
+            //        Name = Name,
+            //        Phone = Phone,//"38" + Regex.Replace(Phone, @"(^\s*\+?(38)?)?(\(|\)|\s|\-)?", string.Empty),
+            //        Status = currentOrderBusModel.Status,
+            //        Date = currentOrderBusModel.Date
+            //    };
+
+            //    db.Entry(mapper.Map(orderBusModel)).State = EntityState.Modified;
+            //    db.SaveChanges();
+            //}
         }
     }
 }

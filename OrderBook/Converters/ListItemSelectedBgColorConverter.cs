@@ -6,22 +6,22 @@
     using System.Windows.Data;
     using System.Windows.Media;
 
-    public class ListItemBgColorConverter : IValueConverter
+    public class ListItemSelectedBgColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var status = (Status) value;
+            var status = (Status)value;
 
             switch (status)
             {
                 case Status.Neutral:
-                    return Brushes.Gainsboro;
+                    return Brushes.DarkGray;
                 case Status.Completed:
-                    return Brushes.GreenYellow;
+                    return Brushes.LawnGreen;
                 case Status.Uncompleted:
-                    return Brushes.Orange;
+                    return Brushes.Goldenrod;
                 case Status.Busy:
-                    return Brushes.Tomato;
+                    return Brushes.Coral;
                 default:
                     return Brushes.White;
             }

@@ -5,6 +5,6 @@ namespace OrderBook.DAL.Context
 {
     public class SettingsContext : DbContext
     {
-        public DbSet<Settings> Settings { get; set; }
+        public DbSet<Setting> Settings { get; set; }
     }
 }

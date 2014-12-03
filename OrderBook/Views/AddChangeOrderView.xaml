@@ -16,15 +16,15 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="0"  Grid.Row="0" Text="Details" Margin="10, 0, 0, 0"/>
-        <TextBlock Grid.Column="1"  Grid.Row="0" Text="Name" Margin="10, 0, 0, 0"/>
-        <TextBlock Grid.Column="2"  Grid.Row="0" Text="Phone" Margin="10, 0, 0, 0"/>
+        <TextBlock Grid.Column="0"  Grid.Row="0" Text="Запчасти" Margin="10, 0, 0, 0"/>
+        <TextBlock Grid.Column="1"  Grid.Row="0" Text="Имя" Margin="10, 0, 0, 0"/>
+        <TextBlock Grid.Column="2"  Grid.Row="0" Text="Телефон" Margin="10, 0, 0, 0"/>
 
         <TextBox Grid.Column="0"  Grid.Row="1" Grid.RowSpan="2" Name="Details" Margin="10,11,10,-34" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" AcceptsReturn="True"/>
         <TextBox Grid.Column="1"  Grid.Row="1" Name="Name"  Height="30" MinWidth="100" Margin="10"/>
         <TextBox Grid.Column="2"  Grid.Row="1" Name="Phone"  Height="30" MinWidth="100" Margin="10"/>
 
-        <Button Grid.Column="1"  Grid.Row="2"  x:Name="Save" Content="Save" Height="30" MinWidth="60" Margin="10,54,10,-30"/>
-        <Button Grid.Column="2"  Grid.Row="2"  x:Name="Cancel" Content="Cancel" Height="30" MinWidth="60" Margin="10,54,10,-29"/>
+        <Button Grid.Column="1"  Grid.Row="2"  x:Name="Save" Content="Сохранить" Height="30" MinWidth="60" Margin="10,54,10,-30"/>
+        <Button Grid.Column="2"  Grid.Row="2"  x:Name="Cancel" Content="Отменить" Height="30" MinWidth="60" Margin="10,54,10,-29"/>
     </Grid>
 </Window>

@@ -4,6 +4,7 @@
     {
         Neutral,
         Completed,
-        Uncompleted
+        Uncompleted,
+        Busy
     }
 }

@@ -6,21 +6,22 @@
     public class Order
     {
         [Key]
+        [Required]
         public Guid Id { get; set; }
 
         [Required]
-        //[StringLength(1000)]
         public String Details { get; set; }
 
         [Required]
-        [StringLength(100)]
         public String Name { get; set; }
 
         [Required]
-        [StringLength(30)]
         public String Phone { get; set; }
 
         [Required]
         public Status Status { get; set; }
+
+        [Required]
+        public DateTime Date { get; set; }
     }
 }

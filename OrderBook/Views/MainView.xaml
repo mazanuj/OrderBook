@@ -8,6 +8,7 @@
         xmlns:businessModels="clr-namespace:OrderBook.DAL.BusinessModels"
         xmlns:viewModels="clr-namespace:OrderBook.ViewModels"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         Title="OrderBook" 
         Height="{Binding Height, Mode=TwoWay}"
@@ -19,6 +20,7 @@
 
     <Window.Resources>
         <converters:ListItemBgColorConverter x:Key="ListItemBgColorConverter" />
+        <converters:ListItemSelectedBgColorConverter x:Key="ListItemSelectedBgColorConverter"/>
         <SolidColorBrush x:Key="brushWatermarkBackground" Color="White" />
         <SolidColorBrush x:Key="brushWatermarkForeground" Color="LightSteelBlue" />
         <SolidColorBrush x:Key="brushWatermarkBorder" Color="Indigo" />        
@@ -39,54 +41,78 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
-            <TextBlock Margin="5,2" Text="Write search text here..." Foreground="{StaticResource brushWatermarkForeground}"
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1" Grid.Row="0" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
+                <TextBlock Margin="5,2" Text="Write search text here..." Foreground="{StaticResource brushWatermarkForeground}"
                        Visibility="{Binding ElementName=TextBoxSearch, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <TextBox Name="TextBoxSearch" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" />
+                <TextBox Name="TextBoxSearch" Background="Transparent" BorderBrush="{StaticResource brushWatermarkBorder}" cal:Message.Attach="[Event KeyDown] = [Action ExecuteFilterView($eventArgs)]" />
+            </Grid>
+            
+            <Button Grid.Column="0" Margin="10,0,0,0" x:Name="Search" Content="Найти" HorizontalAlignment="Right"/>
         </Grid>
+        
 
-        <ListView Grid.Row="1" x:Name="OrderCollection" SelectionMode="Single" Margin="0, 0, 5, 0"
-                  d:DataContext="{d:DesignInstance businessModels:OrderBusinessModel}" Background="CornflowerBlue">
-            <ListView.ItemContainerStyle >
+        <ListView Grid.Row="1" x:Name="OrderCollection" SelectionMode="Single" Margin="5, 0, 5, 5"
+              d:DataContext="{d:DesignInstance businessModels:OrderBusinessModel}"  Background="CornflowerBlue">
+            <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}">
-                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True" >
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="Background" Value="{Binding Status, Converter={StaticResource ListItemSelectedBgColorConverter}}" />
+                            <Setter Property="Foreground" Value="Black" />
+                        </Trigger>
+                    </Style.Triggers>
+                    <Style.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                    </Style.Resources>
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick] = [Action ChangeItem($dataContext)]"/>
+                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}"/>                    
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu x:Name="cm" cal:Action.TargetWithoutContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-
-                                <MenuItem Header="Add new item" 
+                                
+                                <MenuItem Header="Добавить"
 									cal:Message.Attach="[Event Click] = [Action AddNewItem()]"/>
 
-                                <MenuItem Header="Change" 
+                                <MenuItem Header="Изменить"
 									cal:Message.Attach="[Event Click] = [Action ChangeItem($dataContext)]"/>
 
-                                <MenuItem Header="Remove" 
+                                <MenuItem Header="Удалить"
 									cal:Message.Attach="[Event Click] = [Action RemoveItem($dataContext)]"/>
 
-                                <MenuItem Header="Set to Completed" 
+                                <MenuItem Header="Выполнено"
 									cal:Message.Attach="[Event Click] = [Action SetToCompleted($dataContext)]"/>
 
-                                <MenuItem Header="Set to Uncompleted" 
+                                <MenuItem Header="Заказ"
 									cal:Message.Attach="[Event Click] = [Action SetToUncompleted($dataContext)]"/>
+
+                                <MenuItem Header="Нет связи"
+									cal:Message.Attach="[Event Click] = [Action SetToBusy($dataContext)]"/>
+
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
                     <Setter Property="Background" Value="{Binding Status, Converter={StaticResource ListItemBgColorConverter}}" />
                     <Setter Property="MinHeight" Value="30"/>
-                    <Setter Property="MaxHeight" Value="300"/>
+                    <Setter Property="MaxHeight" Value="300"/>      
                 </Style>
             </ListView.ItemContainerStyle>
-
             <ListView.View>
                 <GridView  >
-                    <GridViewColumn Header="Details" DisplayMemberBinding="{Binding Details}" Width="{Binding DetailsWidth, Mode=TwoWay}"/>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="{Binding NameWidth, Mode=TwoWay}"/>
-                    <GridViewColumn Header="Phone" DisplayMemberBinding="{Binding Phone}" Width="{Binding PhoneWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}" Width="{Binding DateWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Запчасти" DisplayMemberBinding="{Binding Details}" Width="{Binding DetailsWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Имя" DisplayMemberBinding="{Binding Name}" Width="{Binding NameWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Телефон" DisplayMemberBinding="{Binding Phone}" Width="{Binding PhoneWidth, Mode=TwoWay}"/>
                 </GridView>
-            </ListView.View>
+            </ListView.View>            
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Add new item" 
+                    <MenuItem Header="Добавить" 
 						cal:Message.Attach="[Event Click] = [Action AddNewItem()]"/>
                 </ContextMenu>
             </ListView.ContextMenu>

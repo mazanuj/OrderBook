@@ -12,5 +12,6 @@ namespace OrderBook.DAL.BusinessModels
         public Int32 PhoneWidth { get; set; }
         public Int32 NameWidth { get; set; }
         public Int32 DetailsWidth { get; set; }
+        public Int32 DateWidth { get; set; }
     }
 }

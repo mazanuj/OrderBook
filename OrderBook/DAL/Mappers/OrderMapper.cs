@@ -12,16 +12,15 @@
                 return null;
             }
 
-            var destination = new Order
+            return new Order
             {
                 Id = source.Id,
-                Details = source.Details,
-                Name = source.Name,
-                Phone = source.Phone,
-                Status = source.Status
+                Details = string.IsNullOrEmpty(source.Details) ? "<>" : source.Details,
+                Name = string.IsNullOrEmpty(source.Name) ? "<>" : source.Name,
+                Phone = string.IsNullOrEmpty(source.Phone) ? "<>" : source.Phone,
+                Status = source.Status,
+                Date = source.Date
             };
-
-            return destination;
         }
 
         public OrderBusinessModel Map(Order source)
@@ -31,16 +30,15 @@
                 return null;
             }
 
-            var destination = new OrderBusinessModel
+            return new OrderBusinessModel
             {
                 Id = source.Id,
-                Details = source.Details,
-                Name = source.Name,
-                Phone = source.Phone,
-                Status = source.Status
+                Details = source.Details == "<>" ? string.Empty : source.Details,
+                Name = source.Name == "<>" ? string.Empty : source.Name,
+                Phone = source.Phone == "<>" ? string.Empty : source.Phone,
+                Status = source.Status,
+                Date = source.Date
             };
-
-            return destination;
         }
     }
 }

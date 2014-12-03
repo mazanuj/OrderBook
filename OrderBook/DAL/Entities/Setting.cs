@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OrderBook.DAL.Entities
 {
-    public class Settings
+    public class Setting
     {
         [Key]
         public Guid Id { get; set; }
@@ -28,5 +28,8 @@ namespace OrderBook.DAL.Entities
 
         [Required]
         public Int32 DetailsWidth { get; set; }
+
+        [Required]
+        public Int32 DateWidth { get; set; }
     }
 }

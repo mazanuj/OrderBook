@@ -16,6 +16,8 @@
 
         public String Phone { get; set; }
 
+        public DateTime Date { get; set; }
+
         public Status Status
         {
             get { return status; }
