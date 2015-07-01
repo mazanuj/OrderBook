@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.Entity;
+using System.Collections.Specialized;
+using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using NPOI.XWPF.UserModel;
 using OrderBook.DAL.BusinessModels;
@@ -34,9 +37,26 @@ namespace OrderBook.ViewModels
         private int detailsWidth = 400;
         private int nameWidth = 100;
         private int phoneWidth = 100;
+        private int selectedNum;
+        private bool canButtonPrev;
+        private bool canButtonForv;
+
+        private List<OrderBusinessModel> orderBusinessModels;
         private readonly OrderMapper orderMapper = new OrderMapper();
         private readonly SettingsMapper settingsMapper = new SettingsMapper();
         public ObservableCollection<OrderBusinessModel> OrderCollection { get; set; }
+
+        private OrderBusinessModel selected;
+
+        public OrderBusinessModel Selected
+        {
+            get { return selected; }
+            set
+            {
+                selected = value;
+                NotifyOfPropertyChange(() => Selected);
+            }
+        }
 
         public int DateWidth
         {
@@ -118,9 +138,29 @@ namespace OrderBook.ViewModels
             }
         }
 
+        public bool CanButtonPrev
+        {
+            get { return canButtonPrev; }
+            set
+            {
+                canButtonPrev = value;
+                NotifyOfPropertyChange(() => CanButtonPrev);
+            }
+        }       
+
+        public bool CanButtonForv
+        {
+            get { return canButtonForv; }
+            set
+            {
+                canButtonForv = value;
+                NotifyOfPropertyChange(() => CanButtonForv);
+            }
+        }
+
         private OrderContext orderDb;
         private SettingsContext settingsDb;
-        private ObservableCollection<OrderBusinessModel> originOrder = new ObservableCollection<OrderBusinessModel>();
+        //private ObservableCollection<OrderBusinessModel> originOrder = new ObservableCollection<OrderBusinessModel>();
 
         [ImportingConstructor]
         public MainViewModel(IWindowManager windowManager)
@@ -137,7 +177,7 @@ namespace OrderBook.ViewModels
         {
             using (orderDb = new OrderContext())
             {
-                var t = orderDb.Orders.Select(order => orderMapper.Map(order)).ToList();
+                var t = orderDb.Orders.ToList().Select(order => orderMapper.Map(order)).ToList();
                 var b = t.Select(x => new OrderBusinessModel
                 {
                     Details = x.Details.Replace(s, s1),
@@ -153,7 +193,6 @@ namespace OrderBook.ViewModels
 
         private void TransferDb(string s, string s1)
         {
-
             using (var stream = File.OpenRead("1.docx"))
             {
                 var doc = new XWPFDocument(stream);
@@ -266,6 +305,7 @@ namespace OrderBook.ViewModels
             {
                 textBoxSearch = value;
                 NotifyOfPropertyChange(() => TextBoxSearch);
+                Task.WhenAny(Search());
             }
         }
 
@@ -277,18 +317,36 @@ namespace OrderBook.ViewModels
             await Search();
         }
 
+        public async Task ButtonForv()
+        {
+            selectedNum++;
+            CanButtonPrev = true;
+
+            if (orderBusinessModels.Count - 1 <= selectedNum)
+                CanButtonForv = false;
+
+            await Scroll();
+        }
+
+        public async Task ButtonPrev()
+        {
+            selectedNum--;
+            CanButtonForv = true;
+
+            if (selectedNum == 0)
+                CanButtonPrev = false;
+            
+            await Scroll();
+        }
+
         private void AddItemsToCollection()
         {
             OrderCollection.Clear();
             using (orderDb = new OrderContext())
             {
-                originOrder =
-                    new ObservableCollection<OrderBusinessModel>();
-                foreach (var order in orderDb.Orders)
+                foreach (var t in orderDb.Orders)
                 {
-                    var t = orderMapper.Map(order);
-                    originOrder.Add(t);
-                    OrderCollection.Add(t);
+                    OrderCollection.Add(orderMapper.Map(t));
                 }
                 //Search();
             }
@@ -299,16 +357,21 @@ namespace OrderBook.ViewModels
             ShowConfirmationItemDialog(null);
         }
 
-        public void RemoveItem(OrderBusinessModel orderBusModel)
+        public async Task RemoveItem(OrderBusinessModel orderBusModel)
         {
-            originOrder.Remove(orderBusModel);
-            OrderCollection.Remove(orderBusModel);
+            await Task.Run(() =>
+            {
+                Application.Current.Dispatcher
+                    .BeginInvoke(
+                        new System.Action(() => OrderCollection.Remove(orderBusModel)));
+            });
             //Search();
         }
 
-        public void ChangeItem(OrderBusinessModel orderBusModel)
+        public async Task ChangeItem(OrderBusinessModel orderBusModel)
         {
             ShowConfirmationItemDialog(orderBusModel);
+            await RemoveItem(orderBusModel);
         }
 
         public void SetToCompleted(OrderBusinessModel orderBusModel)
@@ -328,9 +391,7 @@ namespace OrderBook.ViewModels
 
         private void ChangeOrderStatus(OrderBusinessModel orderBusModel, Status status)
         {
-            var index = originOrder.IndexOf(orderBusModel);
-            originOrder[index].Status = status;
-
+            OrderCollection[OrderCollection.IndexOf(orderBusModel)].Status = status;
             //switch (status)
             //{
             //    case Status.Busy:
@@ -356,7 +417,7 @@ namespace OrderBook.ViewModels
 
         private void ShowConfirmationItemDialog(OrderBusinessModel currentOrderBusModel)
         {
-            var confirmationViewModel = new AddChangeOrderViewModel(currentOrderBusModel, OrderCollection, originOrder);
+            var confirmationViewModel = new AddChangeOrderViewModel(currentOrderBusModel, OrderCollection);
             windowManager.ShowDialog(confirmationViewModel);
 
             //if (confirmationViewModel.IsOkay)
@@ -365,46 +426,74 @@ namespace OrderBook.ViewModels
 
         public async Task Search()
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
-                var searchText = TextBoxSearch;
+                var searchText = TextBoxSearch.ToLower();
 
                 if (string.IsNullOrEmpty(searchText) ||
-                    string.IsNullOrWhiteSpace(searchText))
+                    string.IsNullOrWhiteSpace(searchText) ||
+                    searchText.Length == 1)
                 {
-                    Application.Current.Dispatcher
-                        .BeginInvoke(
-                            new System.Action(
-                                () =>
-                                {
-                                    OrderCollection.Clear();
-                                    foreach (var orderBusinessModel in originOrder)
-                                    {
-                                        OrderCollection.Add(orderBusinessModel);
-                                    }
-                                }));
-
+                    CanButtonForv = false;
+                    CanButtonPrev = false;
                     return;
                 }
 
-                //OrderCollection.Clear();
-                var orderBusinessModels = originOrder
-                    .Where(x => (x.Details != null && x.Details.Contains(searchText)) ||
-                                (x.Name != null && x.Name.Contains(searchText)) ||
-                                (x.Phone != null && x.Phone.Contains(searchText)));
+                orderBusinessModels = OrderCollection
+                    .Where(x => (x.Details != null && x.Details.ToLower().Contains(searchText)) ||
+                                (x.Name != null && x.Name.ToLower().Contains(searchText)) ||
+                                (x.Phone != null && x.Phone.ToLower().Contains(searchText)))
+                    .ToList();
 
+                selectedNum = 0;
+                CanButtonPrev = false;
+                CanButtonForv = false;
 
-                var businessModels = orderBusinessModels as IList<OrderBusinessModel> ?? orderBusinessModels.ToList();
-                if (!businessModels.Any())
+                if (!orderBusinessModels.Any())
                     return;
 
-                //businessModels.Where(x => x.Status == Status.Busy).Apply(x => OrderCollection.Add(x));
-                //businessModels.Where(x => x.Status == Status.Uncompleted).Apply(x => OrderCollection.Add(x));
-                //businessModels.Where(x => x.Status == Status.Neutral).Apply(x => OrderCollection.Add(x));
-                //businessModels.Where(x => x.Status == Status.Completed).Apply(x => OrderCollection.Add(x));
+                if (orderBusinessModels.Count > 1)
+                    CanButtonForv = true;
 
-                Task.WhenAll(Sort(businessModels, searchText));
+                await Scroll();
+                //await Sort(businessModels, searchText);
             });
+        }
+
+        private async Task Scroll()
+        {
+            if (orderBusinessModels == null || orderBusinessModels.Count == 0)
+                return;
+            await Task.Run(() =>
+            {
+                Application.Current.Dispatcher
+                    .BeginInvoke(
+                        new System.Action(
+                            () =>
+                            {
+                                try
+                                {
+                                    Selected = orderBusinessModels[selectedNum];
+                                }
+                                catch (Exception ex)
+                                {
+                                }
+                            }));
+            });
+        }
+
+        public void ScrollIntoView(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count == 0)
+                return;
+            try
+            {
+                ((ListBox) sender).ScrollIntoView(e.AddedItems[0]);
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         public void OnClose()
@@ -434,14 +523,14 @@ namespace OrderBook.ViewModels
             using (orderDb = new OrderContext())
             {
                 orderDb.Database.Delete();
-                orderDb.Orders.AddRange(originOrder.Select(x => orderMapper.Map(x)));
+                orderDb.Orders.AddRange(OrderCollection.Select(x => orderMapper.Map(x)));
                 orderDb.SaveChanges();
             }
         }
 
         private async Task Sort(IEnumerable<OrderBusinessModel> orderCollection, string query)
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 //OrderCollection.Clear();
 
@@ -472,22 +561,25 @@ namespace OrderBook.ViewModels
                     }
                 }
 
-                Application.Current.Dispatcher
-                    .BeginInvoke(
-                        new System.Action(
-                            () =>
-                            {
-                                OrderCollection.Clear();
+                await Task.Run(() =>
+                {
+                    Application.Current.Dispatcher
+                        .BeginInvoke(
+                            new System.Action(
+                                () =>
+                                {
+                                    OrderCollection.Clear();
 
-                                foreach (var order in busy)
-                                    OrderCollection.Add(order);
-                                foreach (var order in uncompleted)
-                                    OrderCollection.Add(order);
-                                foreach (var order in neutral)
-                                    OrderCollection.Add(order);
-                                foreach (var order in completed)
-                                    OrderCollection.Add(order);
-                            }));
+                                    foreach (var order in busy)
+                                        OrderCollection.Add(order);
+                                    foreach (var order in uncompleted)
+                                        OrderCollection.Add(order);
+                                    foreach (var order in neutral)
+                                        OrderCollection.Add(order);
+                                    foreach (var order in completed)
+                                        OrderCollection.Add(order);
+                                }));
+                });
             });
         }
     }

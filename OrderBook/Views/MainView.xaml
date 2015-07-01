@@ -11,10 +11,10 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         Title="OrderBook" 
-        Height="{Binding Height, Mode=TwoWay}"
-        Width="{Binding Width, Mode=TwoWay}" 
-        Left="{Binding Left, Mode=TwoWay}"
-        Top="{Binding Top, Mode=TwoWay}"
+        Height="{Binding Height}"
+        Width="{Binding Width}" 
+        Left="{Binding Left}"
+        Top="{Binding Top}"
         cal:Message.Attach="[Event Closing] = [Action OnClose()]"
         d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
 
@@ -45,6 +45,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1" Grid.Row="0" Background="{StaticResource brushWatermarkBackground}" Style="{StaticResource EntryFieldStyle}" >
                 <TextBlock Margin="5,2" Text="Write search text here..." Foreground="{StaticResource brushWatermarkForeground}"
@@ -53,15 +54,20 @@
             </Grid>
             
             <Button Grid.Column="0" Margin="10,0,0,0" x:Name="Search" Content="Найти" HorizontalAlignment="Right"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Name="ButtonPrev" Content="Предыдущий" Margin="0,0,5,0"/>
+                <Button Name="ButtonForv" Content="Следующий" Margin="0,0,5,0"/>
+            </StackPanel>
         </Grid>
         
-
         <ListView Grid.Row="1" x:Name="OrderCollection" SelectionMode="Single" Margin="5, 0, 5, 5"
-              d:DataContext="{d:DesignInstance businessModels:OrderBusinessModel}"  Background="CornflowerBlue">
+              d:DataContext="{d:DesignInstance businessModels:OrderBusinessModel}" Background="CornflowerBlue" 
+                  SelectedItem="{Binding Selected}"
+                  cal:Message.Attach="[Event SelectionChanged] = [Action ScrollIntoView($source,$eventArgs)]">
             <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
+                <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True" >
+                        <Trigger Property="IsSelected" Value="True" >                            
                             <Setter Property="FontWeight" Value="Bold" />
                             <Setter Property="Background" Value="{Binding Status, Converter={StaticResource ListItemSelectedBgColorConverter}}" />
                             <Setter Property="Foreground" Value="Black" />
@@ -69,9 +75,9 @@
                     </Style.Triggers>
                     <Style.Resources>
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-                    </Style.Resources>
+                    </Style.Resources>                    
                     <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick] = [Action ChangeItem($dataContext)]"/>
-                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}"/>                    
+                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu x:Name="cm" cal:Action.TargetWithoutContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
@@ -101,15 +107,20 @@
                     <Setter Property="MinHeight" Value="30"/>
                     <Setter Property="MaxHeight" Value="300"/>      
                 </Style>
-            </ListView.ItemContainerStyle>
+            </ListView.ItemContainerStyle>    
             <ListView.View>
                 <GridView  >
-                    <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}" Width="{Binding DateWidth, Mode=TwoWay}"/>
-                    <GridViewColumn Header="Запчасти" DisplayMemberBinding="{Binding Details}" Width="{Binding DetailsWidth, Mode=TwoWay}"/>
-                    <GridViewColumn Header="Имя" DisplayMemberBinding="{Binding Name}" Width="{Binding NameWidth, Mode=TwoWay}"/>
-                    <GridViewColumn Header="Телефон" DisplayMemberBinding="{Binding Phone}" Width="{Binding PhoneWidth, Mode=TwoWay}"/>
+                    <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}" Width="{Binding DateWidth}"/>
+                    <GridViewColumn Header="Запчасти" DisplayMemberBinding="{Binding Details}" Width="{Binding DetailsWidth}"/>
+                    <GridViewColumn Header="Имя" DisplayMemberBinding="{Binding Name}" Width="{Binding NameWidth}"/>
+                    <GridViewColumn Header="Телефон" DisplayMemberBinding="{Binding Phone}" Width="150"/>
                 </GridView>
-            </ListView.View>            
+            </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Добавить" 
